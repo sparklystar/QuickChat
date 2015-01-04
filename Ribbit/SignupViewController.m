@@ -14,10 +14,19 @@
 @property (weak, nonatomic) IBOutlet UITextField *username;
 @property (weak, nonatomic) IBOutlet UITextField *password;
 @property (weak, nonatomic) IBOutlet UITextField *email;
+@property (weak, nonatomic) IBOutlet UIImageView *backgroundImageView;
 
 @end
 
 @implementation SignupViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.username.delegate = self;
+    self.password.delegate = self;
+    self.email.delegate = self;
+}
 
 - (IBAction)signUp:(id)sender {
     NSString *username = [self.username.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -42,6 +51,13 @@
             }
         }];
     }
+}
+
+#pragma mark - UITextField delegate methods
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    
+    return YES;
 }
 
 @end

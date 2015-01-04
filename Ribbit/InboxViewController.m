@@ -22,23 +22,23 @@
     } else {
         [self performSegueWithIdentifier:@"showLogin" sender:self];
     }
+    
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    [self.refreshControl addTarget:self action:@selector(retrieveMessages) forControlEvents:UIControlEventValueChanged];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    PFQuery *query = [PFQuery queryWithClassName:@"Messages"];
-    [query whereKey:@"recipientIds" equalTo:[[PFUser currentUser] objectId]];
-    [query orderByDescending:@"createdAt"];
-    [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
-        if (error) {
-            NSLog(@"Error %@ %@", error, [error userInfo]);
-        } else {
-            self.messages = objects;
-            [self.tableView reloadData];
-            NSLog(@"Retrieved %d messages", (int)[self.messages count]);
-        }
-    }];
+    [self.navigationController.navigationBar setHidden:NO];
+    
+    PFUser *currentUser = [PFUser currentUser];
+    
+    if (currentUser) {
+        [self retrieveMessages];
+    } else {
+        [self performSegueWithIdentifier:@"showLogin" sender:self];
+    }
 }
 
 - (IBAction)logout:(id)sender {
@@ -111,6 +111,26 @@
         ImageViewController *imageViewController = (ImageViewController *)segue.destinationViewController;
         imageViewController.message = self.selectedMessage;
     }
+}
+
+#pragma mark - Helper methods
+- (void)retrieveMessages {
+    PFQuery *query = [PFQuery queryWithClassName:@"Messages"];
+    [query whereKey:@"recipientIds" equalTo:[[PFUser currentUser] objectId]];
+    [query orderByDescending:@"createdAt"];
+    [query findObjectsInBackgroundWithBlock:^(NSArray *objects, NSError *error) {
+        if (error) {
+            NSLog(@"Error %@ %@", error, [error userInfo]);
+        } else {
+            self.messages = objects;
+            [self.tableView reloadData];
+            NSLog(@"Retrieved %d messages", (int)[self.messages count]);
+        }
+        
+        if ([self.refreshControl isRefreshing]) {
+            [self.refreshControl endRefreshing];
+        }
+    }];
 }
 
 @end

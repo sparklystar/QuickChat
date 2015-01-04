@@ -8,6 +8,7 @@
 
 #import "FriendsViewController.h"
 #import "EditFriendsViewController.h"
+#import "GravatarUrlBuilder.h"
 
 @implementation FriendsViewController
 
@@ -48,6 +49,19 @@
     
     PFUser *user = [self.friends objectAtIndex:indexPath.row];
     cell.textLabel.text = user.username;
+    
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(queue, ^{
+        NSString *email = [user objectForKey:@"email"];
+        NSURL *gravatarUrl = [GravatarUrlBuilder getGravatarUrl:email];
+        NSLog(@"%@", gravatarUrl);
+        NSData *imageData = [NSData dataWithContentsOfURL:gravatarUrl];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            cell.imageView.image = [UIImage imageWithData:imageData];
+            [cell setNeedsLayout];
+        });
+    });
     
     return cell;
 }

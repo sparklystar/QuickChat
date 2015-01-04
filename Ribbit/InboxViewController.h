@@ -15,5 +15,6 @@
 @property (nonatomic, strong) NSArray *messages;
 @property (nonatomic, strong) PFObject *selectedMessage;
 @property (nonatomic, strong) MPMoviePlayerController *moviePlayer;
+@property (nonatomic, strong) UIRefreshControl *refreshControl;
 
 @end
